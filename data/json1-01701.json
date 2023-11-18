@@ -1,0 +1,96 @@
+{
+   "results" : 
+   [
+      {
+         "address_components" : 
+         [
+            {
+               "long_name" : "01701",
+               "short_name" : "01701",
+               "types" : 
+               [
+                  "postal_code"
+               ]
+            },
+            {
+               "long_name" : "Framingham",
+               "short_name" : "Framingham",
+               "types" : 
+               [
+                  "locality",
+                  "political"
+               ]
+            },
+            {
+               "long_name" : "Middlesex County",
+               "short_name" : "Middlesex County",
+               "types" : 
+               [
+                  "administrative_area_level_2",
+                  "political"
+               ]
+            },
+            {
+               "long_name" : "Massachusetts",
+               "short_name" : "MA",
+               "types" : 
+               [
+                  "administrative_area_level_1",
+                  "political"
+               ]
+            },
+            {
+               "long_name" : "United States",
+               "short_name" : "US",
+               "types" : 
+               [
+                  "country",
+                  "political"
+               ]
+            }
+         ],
+         "formatted_address" : "Framingham, MA 01701, USA",
+         "geometry" : 
+         {
+            "bounds" : 
+            {
+               "northeast" : 
+               {
+                  "lat" : 42.35313,
+                  "lng" : -71.37751209999999
+               },
+               "southwest" : 
+               {
+                  "lat" : 42.29331,
+                  "lng" : -71.4928039
+               }
+            },
+            "location" : 
+            {
+               "lat" : 42.3240042,
+               "lng" : -71.4536835
+            },
+            "location_type" : "APPROXIMATE",
+            "viewport" : 
+            {
+               "northeast" : 
+               {
+                  "lat" : 42.35313,
+                  "lng" : -71.37751209999999
+               },
+               "southwest" : 
+               {
+                  "lat" : 42.29331,
+                  "lng" : -71.4928039
+               }
+            }
+         },
+         "place_id" : "ChIJDQkFLCKJ44kRuNO8RWIercI",
+         "types" : 
+         [
+            "postal_code"
+         ]
+      }
+   ],
+   "status" : "OK"
+}

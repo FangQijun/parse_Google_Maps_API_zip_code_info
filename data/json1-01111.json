@@ -1,0 +1,105 @@
+{
+   "results" : 
+   [
+      {
+         "address_components" : 
+         [
+            {
+               "long_name" : "01111",
+               "short_name" : "01111",
+               "types" : 
+               [
+                  "postal_code"
+               ]
+            },
+            {
+               "long_name" : "Pine Point",
+               "short_name" : "Pine Point",
+               "types" : 
+               [
+                  "neighborhood",
+                  "political"
+               ]
+            },
+            {
+               "long_name" : "Springfield",
+               "short_name" : "Springfield",
+               "types" : 
+               [
+                  "locality",
+                  "political"
+               ]
+            },
+            {
+               "long_name" : "Hampden County",
+               "short_name" : "Hampden County",
+               "types" : 
+               [
+                  "administrative_area_level_2",
+                  "political"
+               ]
+            },
+            {
+               "long_name" : "Massachusetts",
+               "short_name" : "MA",
+               "types" : 
+               [
+                  "administrative_area_level_1",
+                  "political"
+               ]
+            },
+            {
+               "long_name" : "United States",
+               "short_name" : "US",
+               "types" : 
+               [
+                  "country",
+                  "political"
+               ]
+            }
+         ],
+         "formatted_address" : "Springfield, MA 01111, USA",
+         "geometry" : 
+         {
+            "bounds" : 
+            {
+               "northeast" : 
+               {
+                  "lat" : 42.11787100000001,
+                  "lng" : -72.547713
+               },
+               "southwest" : 
+               {
+                  "lat" : 42.116883,
+                  "lng" : -72.5489479
+               }
+            },
+            "location" : 
+            {
+               "lat" : 42.117339,
+               "lng" : -72.5481187
+            },
+            "location_type" : "APPROXIMATE",
+            "viewport" : 
+            {
+               "northeast" : 
+               {
+                  "lat" : 42.11872598029151,
+                  "lng" : -72.5469814697085
+               },
+               "southwest" : 
+               {
+                  "lat" : 42.11602801970851,
+                  "lng" : -72.5496794302915
+               }
+            }
+         },
+         "place_id" : "ChIJadSSQL7n5okRVYrXwgGEyUg",
+         "types" : 
+         [
+            "postal_code"
+         ]
+      }
+   ],
+   "status" : "OK"
+}
