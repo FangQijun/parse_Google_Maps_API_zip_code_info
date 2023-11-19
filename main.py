@@ -29,6 +29,10 @@ def send_one_api_payload(zip_code, country_code, api_token, verbose=False):
     return response
 
 
+def load_zip_codes_info_to_db(): # TODO
+    return None
+
+
 if __name__ == "__main__":
     api_token = os.environ.get("GOOGLE_MAPS_API_TOKEN")
     list_zip_codes_to_query, notes = get_zip_list_to_query()
@@ -67,3 +71,5 @@ if __name__ == "__main__":
                 with open(os.path.join(".", "data", response_filename), 'w') as f:
                     f.write(json.dumps(api_response))
                 read_json_file(zip_code, notes=notes)
+
+    # load_zip_codes_info_to_db()  # TODO
