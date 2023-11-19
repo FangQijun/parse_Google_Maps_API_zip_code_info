@@ -9,9 +9,8 @@ def safe_get(element, *keys):
 
     _element = element
     for key in keys:
-        try:
-            _element = _element.get(key)
-        except KeyError:
+        _element = _element.get(key)
+        if _element is None:
             return None
     return _element
 
