@@ -1,1 +1,3 @@
 credential_dont_push_to_GitHub/
+.idea/
+.DS_Store
