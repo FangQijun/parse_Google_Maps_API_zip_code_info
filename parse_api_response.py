@@ -4,30 +4,16 @@ import pandas as pd
 from helper_function import *
 
 
-def record_bad_response(z_code, *args, filename, extension="csv"):
-    bad_record_file = os.path.join(".", "output", filename + "." + extension)
-    if not os.path.exists(bad_record_file):
-        with open(bad_record_file, "a+") as f:
-            if len(args) > 0:
-                text_headers = ",".join(["zip_code"] + [args[0]])
-            else:
-                text_headers = "zip_code"
-            f.write("{}\n".format(text_headers))
-    with open(bad_record_file, "a+") as f:
-        if len(args) > 0:
-            text_entries = ",".join([z_code] + [args[1]])
-        else:
-            text_entries = z_code
-        f.write("{}\n".format(text_entries))
-
-
 def check_zip_code_type(json_result):
     return "postal_code" in json_result["types"]
 
 
-def parse_zip_code_info(zip_code, json_result):
+def parse_zip_code_info(zip_code, json_result, notes="normal zip code"):
     if not check_zip_code_type(json_result):
         record_bad_response(zip_code, filename="zip_codes_with_non_postal_code_response")
+        # TODO: Military / Diplomatic zip codes (APO, EPO, DPO) shall all be harvested here
+        #       "types" : ["country", "political"]
+        #       "geometry": {"location": {"lat": 37.09024, "lng": -95.712891}}
         return
 
     val_geo_type = "zip code"
@@ -81,6 +67,8 @@ def parse_zip_code_info(zip_code, json_result):
     df_zip_code_info_values = [
         locals().get("val_" + c, '') for c in df_zip_code_info_columns  # In case variable `val_xyz` doesn't exist
     ]
+    df_zip_code_info_columns += ["notes"]
+    df_zip_code_info_values += [notes]
     df_zip_code_info = pd.DataFrame(
         [{key: val for (key, val) in zip(df_zip_code_info_columns, df_zip_code_info_values)}],
         columns=df_zip_code_info_columns
@@ -100,7 +88,7 @@ def parse_zip_code_info(zip_code, json_result):
     return df_zip_code_info
 
 
-def read_json_file(zip_code):
+def read_json_file(zip_code, notes="normal zip code"):
     json_file_path = os.path.join(".", "data", "json1-{}.json".format(zip_code))
     with open(json_file_path, "r") as json_file:
         json_response = json.load(json_file)
@@ -114,7 +102,7 @@ def read_json_file(zip_code):
             )
         else:
             json_result = json_response["results"][0]
-            parse_zip_code_info(zip_code, json_result)
+            parse_zip_code_info(zip_code, json_result, notes)
 
 
 if __name__ == "__main__":
@@ -134,7 +122,9 @@ if __name__ == "__main__":
             os.path.join(".", "output", "valid_zip_codes_info.tsv"),
             dtype=str, sep="\t", usecols=["zip_code"]
         )
-        if zip_code not in list(df_zip_codes_already_parsed["zip_code"]):
-            read_json_file(zip_code)
+        list_zip_codes_already_parsed = list(df_zip_codes_already_parsed["zip_code"])
     else:
+        list_zip_codes_already_parsed = []
+
+    if zip_code not in list_zip_codes_already_parsed:
         read_json_file(zip_code)

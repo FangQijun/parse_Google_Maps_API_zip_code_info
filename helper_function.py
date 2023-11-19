@@ -1,3 +1,6 @@
+import os
+
+
 def safe_get(element, *keys):
     """
     Return dictionary value if *keys (nested) exists in `element` (dict).
@@ -31,3 +34,20 @@ def check_key_exists(element, *keys):
         except KeyError:
             return False
     return True
+
+
+def record_bad_response(z_code, *args, filename, extension="csv"):
+    bad_record_file = os.path.join(".", "output", filename + "." + extension)
+    if not os.path.exists(bad_record_file):
+        with open(bad_record_file, "a+") as f:
+            if len(args) > 0:
+                text_headers = ",".join(["zip_code"] + [args[0]])
+            else:
+                text_headers = "zip_code"
+            f.write("{}\n".format(text_headers))
+    with open(bad_record_file, "a+") as f:
+        if len(args) > 0:
+            text_entries = ",".join([z_code] + [args[1]])
+        else:
+            text_entries = z_code
+        f.write("{}\n".format(text_entries))
