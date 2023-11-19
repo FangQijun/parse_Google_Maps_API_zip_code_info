@@ -4,70 +4,16 @@ import pandas as pd
 from helper_function import *
 
 
-def add_to_empty_response_list(zip_code):
-    if not os.path.exists(os.path.join(".", "output")):
-        os.makedirs(os.path.join(".", "output"))
-    empty_response_record_file = os.path.join(".", "output", "zip_codes_with_empty_api_response.csv")
-    if not os.path.exists(empty_response_record_file):
-        with open(empty_response_record_file, "a+") as record_file:
-            record_file.write("zip_code\n")
-    with open(empty_response_record_file, "a+") as record_file:
-        record_file.write("{}\n".format(zip_code))
-
-
-def add_to_multi_response_list(zip_code, length):
-    if not os.path.exists(os.path.join(".", "output")):
-        os.makedirs(os.path.join(".", "output"))
-    multi_response_record_file = os.path.join(".", "output", "zip_codes_with_multiple_api_responses.csv")
-    if not os.path.exists(multi_response_record_file):
-        with open(multi_response_record_file, "a+") as record_file:
-            record_file.write("{col1},{col2}\n".format(col1="zip_code", col2="num_response"))
-    with open(multi_response_record_file, "a+") as record_file:
-        record_file.write("{col1},{col2}\n".format(col1=str(zip_code), col2=str(length)))
-
-
-def add_to_non_postal_code_list(zip_code):
-    if not os.path.exists(os.path.join(".", "output")):
-        os.makedirs(os.path.join(".", "output"))
-    non_postal_code_record_file = os.path.join(".", "output", "zip_codes_with_non_postal_code_response.csv")
-    if not os.path.exists(non_postal_code_record_file):
-        with open(non_postal_code_record_file, "a+") as record_file:
-            record_file.write("zip_code\n")
-    with open(non_postal_code_record_file, "a+") as record_file:
-        record_file.write("{}\n".format(zip_code))
-
-
-def add_to_missing_addr_components_list(zip_code):
-    if not os.path.exists(os.path.join(".", "output")):
-        os.makedirs(os.path.join(".", "output"))
-    missing_addr_comp_record_file = os.path.join(".", "output", "zip_codes_missing_address_components_response.csv")
-    if not os.path.exists(missing_addr_comp_record_file):
-        with open(missing_addr_comp_record_file, "a+") as record_file:
-            record_file.write("zip_code\n")
-    with open(missing_addr_comp_record_file, "a+") as record_file:
-        record_file.write("{}\n".format(zip_code))
-
-
-def add_to_mismatched_zip_code_list(zip_code):
-    if not os.path.exists(os.path.join(".", "output")):
-        os.makedirs(os.path.join(".", "output"))
-    mismatched_zip_code_record_file = os.path.join(".", "output", "zip_codes_mismatched_response.csv")
-    if not os.path.exists(mismatched_zip_code_record_file):
-        with open(mismatched_zip_code_record_file, "a+") as record_file:
-            record_file.write("zip_code\n")
-    with open(mismatched_zip_code_record_file, "a+") as record_file:
-        record_file.write("{}\n".format(zip_code))
-
-
 def check_zip_code_type(json_result):
     return "postal_code" in json_result["types"]
 
 
-def parse_zip_code_info(zip_code, json_result):
-    if not os.path.exists(os.path.join(".", "output")):
-        os.makedirs(os.path.join(".", "output"))
+def parse_zip_code_info(zip_code, json_result, notes="normal zip code"):
     if not check_zip_code_type(json_result):
-        add_to_non_postal_code_list(zip_code)
+        record_bad_response(zip_code, filename="zip_codes_with_non_postal_code_response")
+        # TODO: Military / Diplomatic zip codes (APO, EPO, DPO) shall all be harvested here
+        #       "types" : ["country", "political"]
+        #       "geometry": {"location": {"lat": 37.09024, "lng": -95.712891}}
         return
 
     val_geo_type = "zip code"
@@ -81,7 +27,7 @@ def parse_zip_code_info(zip_code, json_result):
     val_southwest_bound_lon = safe_get(json_result, "geometry", "bounds", "southwest", "lng")
 
     if not check_key_exists(json_result, "address_components"):
-        add_to_missing_addr_components_list(zip_code)
+        record_bad_response(zip_code, filename="zip_codes_missing_address_components_in_response")
         return
     df_address_components = pd.json_normalize(json_result["address_components"])
 
@@ -102,7 +48,10 @@ def parse_zip_code_info(zip_code, json_result):
             val_country_code = row["short_name"]
 
     if not val_zip_code or val_zip_code != zip_code:
-        add_to_mismatched_zip_code_list(zip_code)
+        record_bad_response(
+            zip_code, "returned_zip_code", val_zip_code,
+            filename="zip_codes_wrong_postal_code_in_response"
+        )
         return
 
     df_zip_code_info_columns = [
@@ -116,16 +65,15 @@ def parse_zip_code_info(zip_code, json_result):
         "country", "country_code"
     ]
     df_zip_code_info_values = [
-        locals().get("val_" + c, '') for c in df_zip_code_info_columns
+        locals().get("val_" + c, '') for c in df_zip_code_info_columns  # In case variable `val_xyz` doesn't exist
     ]
+    df_zip_code_info_columns += ["notes"]
+    df_zip_code_info_values += [notes]
     df_zip_code_info = pd.DataFrame(
         [{key: val for (key, val) in zip(df_zip_code_info_columns, df_zip_code_info_values)}],
         columns=df_zip_code_info_columns
     )
-    # print(df_zip_code_info)
 
-    if not os.path.exists(os.path.join(".", "output")):
-        os.makedirs(os.path.join(".", "output"))
     valid_zip_code_record_file = os.path.join(".", "output", "valid_zip_codes_info.tsv")
     if not os.path.exists(valid_zip_code_record_file):
         df_zip_code_info.to_csv(
@@ -140,19 +88,43 @@ def parse_zip_code_info(zip_code, json_result):
     return df_zip_code_info
 
 
-def read_json_file(zip_code):
+def read_json_file(zip_code, notes="normal zip code"):
     json_file_path = os.path.join(".", "data", "json1-{}.json".format(zip_code))
     with open(json_file_path, "r") as json_file:
         json_response = json.load(json_file)
         if len(json_response["results"]) == 0:
-            add_to_empty_response_list(zip_code)
+            record_bad_response(zip_code, filename="zip_codes_with_empty_api_response")
         elif len(json_response["results"]) > 1:
-            add_to_multi_response_list(zip_code, len(json_response))
+            record_bad_response(
+                zip_code,
+                "num_response", str(len(json_response)),
+                filename="zip_codes_with_multiple_api_responses"
+            )
         else:
             json_result = json_response["results"][0]
-            parse_zip_code_info(zip_code, json_result)
+            parse_zip_code_info(zip_code, json_result, notes)
 
 
 if __name__ == "__main__":
-    zip_code = "01701"
-    read_json_file(zip_code)
+    if not os.path.exists(os.path.join(".", "output")):
+        os.makedirs(os.path.join(".", "output"))
+
+    # zip_code = "00000"  # To test empty response
+    # zip_code = "26140"  # To test multi-result response
+    # zip_code = "021"  # To test non-postal-code response
+    # zip_code = "01706"  # To test responses with no "address_components"
+    # zip_code = "01707"  # To test responses returning a mismatched zip code
+    # zip_code = "01701"  # A normal zip code file
+    zip_code = "01703"  # A special zip code file
+
+    if os.path.exists(os.path.join(".", "output", "valid_zip_codes_info.tsv")):
+        df_zip_codes_already_parsed = pd.read_csv(
+            os.path.join(".", "output", "valid_zip_codes_info.tsv"),
+            dtype=str, sep="\t", usecols=["zip_code"]
+        )
+        list_zip_codes_already_parsed = list(df_zip_codes_already_parsed["zip_code"])
+    else:
+        list_zip_codes_already_parsed = []
+
+    if zip_code not in list_zip_codes_already_parsed:
+        read_json_file(zip_code)
